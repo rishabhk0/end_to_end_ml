@@ -1,1 +1,31 @@
 
+┌─────────────────────────────────────────────────────────┐
+│                     TRAINING PHASE                       │
+│                                                         │
+│  [ScienceQA Dataset] ──► [QLoRA Fine-tuning] ──► [LoRA  │
+│                              │                   Adapter]│
+│                              ▼                          │
+│                        [MLflow Tracking]                │
+│                    (LR, rank, loss, accuracy)           │
+└──────────────────────────────┬──────────────────────────┘
+                               │ merge_and_unload()
+                               ▼
+┌─────────────────────────────────────────────────────────┐
+│                    EVALUATION GATE                       │
+│                                                         │
+│  [Merged Model] ──► [200 Benchmark Qs] ──► [Accuracy?]  │
+│                                              │          │
+│                              ≥ threshold ───►│ PASS     │
+│                              < threshold ───►│ BLOCK    │
+└──────────────────────────────┬──────────────────────────┘
+                               │ if PASS
+                               ▼
+┌─────────────────────────────────────────────────────────┐
+│                   PRODUCTION SERVING                     │
+│                                                         │
+│  [Image + Question] ──► [FastAPI] ──► [Inference]       │
+│                                           │             │
+│                                    [JSON Response]      │
+│                                                         │
+│  Docker Container ◄── GitHub Actions ◄── Git Push       │
+└─────────────────────────────────────────────────────────┘
